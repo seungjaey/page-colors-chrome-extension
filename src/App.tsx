@@ -1,59 +1,89 @@
+import { pipe, map, toArray } from '@fxts/core';
 import { useEffect, useState } from "react";
-import { ChakraProvider } from "@chakra-ui/react";
-import logo from "logo.svg";
+import { ChakraProvider, Container, Box, Heading, Text } from "@chakra-ui/react";
 import { css } from "@emotion/css";
 
-import type { DOMMessage, DOMMessageResponse } from "types";
+import { EventTypes } from "constants/EventTypes";
+import { EXTRACT_ATTRIBUTES_ORDER, EXTRACT_ATTRIBUTES } from "constants/ExtractAttributes";
+import type { EventMessage } from "types";
+
+const containerCSS = css({
+  minWidth: '500px'
+})
 
 const App = () => {
-  const [title, setTitle] = useState("");
-  const [headlines, setHeadlines] = useState<string[]>([]);
-
+  const [extractionResult, setExtractionResult] = useState({});
   useEffect(() => {
-    chrome.tabs &&
-      chrome.tabs.query(
-        {
-          active: true,
-          currentWindow: true,
-        },
-        (tabs) => {
-          /**
-           * Sends a single message to the content script(s) in the specified tab,
-           * with an optional callback to run when a response is sent back.
-           *
-           * The runtime.onMessage event is fired in each content script running
-           * in the specified tab for the current extension.
-           */
-          chrome.tabs.sendMessage(
-            tabs[0].id || 0,
-            { type: "GET_DOM" } as DOMMessage,
-            (response: DOMMessageResponse) => {
-              setTitle(response.title);
-              setHeadlines(response.headlines);
-            }
-          );
-        }
-      );
+    if (!chrome.tabs) {
+      return;
+    }
+    chrome.tabs.query(
+      {
+        active: true,
+        currentWindow: true,
+      },
+      (tabs) => {
+        /**
+         * Sends a single message to the content script(s) in the specified tab,
+         * with an optional callback to run when a response is sent back.
+         *
+         * The runtime.onMessage event is fired in each content script running
+         * in the specified tab for the current extension.
+         */
+        chrome.tabs.sendMessage(
+          tabs[0].id || 0,
+          { type: EventTypes.RUN_EXTRACT } as EventMessage,
+          (response: EventMessage) => {
+            // @ts-ignore
+            const { payload: { data } } = response;
+            console.log(`Receive Message`);
+            setExtractionResult(() => data);
+          }
+        );
+      }
+    );
   }, []);
+
+  const handle = () => {
+
+  }
+
+  // NOTE:
+  const handle = useCallback(() => () => {
+
+  }, [a,b,c,d,~, z])
 
   return (
     <ChakraProvider>
-      <div className="App" css={css({ backgroundColor: "red" })}>
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      <Container as="main" minWidth={500}>
+        <button onClick={() => handle(a)}></button>
+
+
+        {
+          pipe(
+            EXTRACT_ATTRIBUTES_ORDER,
+            map(attributeName => {
+              const { label } = EXTRACT_ATTRIBUTES[attributeName];
+              // @ts-ignore
+              const target = extractionResult[attributeName];
+
+              return (
+                <Box key={`${attributeName}-${label}`} as="section">
+                  <Box>
+                    <Heading as="h1" size="sm">{label}</Heading>
+                  </Box>
+                  <Box>
+                    {
+                      JSON.stringify(target)
+                    }
+                  </Box>
+                </Box>
+              )
+            }),
+            toArray
+          )
+        }
+      </Container>
     </ChakraProvider>
   );
 };

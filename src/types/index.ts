@@ -1,8 +1,10 @@
-export type DOMMessage = {
-  type: "GET_DOM";
-};
+export type EventTypeNames = 'RUN_EXTRACT';
 
-export type DOMMessageResponse = {
-  title: string;
-  headlines: string[];
-};
+export interface EventPayload {
+  data: unknown;
+}
+
+export interface EventMessage {
+  type: EventTypeNames;
+  payload?: EventPayload;
+}
