@@ -41,7 +41,7 @@ const extract = () => {
         entries(EXTRACT_ATTRIBUTES),
         map(args => {
           const [key, value] = args
-          const { label, attr } = value
+          const { attr } = value
           const targetAttributeValue = nodeComputedStyle.getPropertyValue(attr)
           const rgbRegex = /rgba?\((?<r>[.\d]+)[, ]+(?<g>[.\d]+)[, ]+(?<b>[.\d]+)(?:\s?[,\/]\s?(?<a>[.\d]+%?))?\)/g
           const isMultiDimension = size(toArray(targetAttributeValue.matchAll(rgbRegex))) > 1
