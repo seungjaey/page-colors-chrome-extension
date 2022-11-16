@@ -1,6 +1,4 @@
-import {ExtractAttributeName} from "../constants/ExtractAttributes";
-
-export type EventTypeNames = 'RUN_EXTRACT';
+export type EventTypeNames = 'RUN_EXTRACT' | 'FOCUS';
 
 export interface EventPayload {
   data: unknown;
@@ -11,8 +9,10 @@ export interface EventMessage {
   payload?: EventPayload;
 }
 
-export interface ExtractionResultItem {
-  [key: string]: string[];
+export interface ExtractionResult {
+  [key: string]: {
+    [subKey: string]: string[]
+  }
 }
 
-export type ExtractionResult = Record<ExtractAttributeName, ExtractionResultItem>;
+export type ExtractedDOMColor = [string, string, string]
